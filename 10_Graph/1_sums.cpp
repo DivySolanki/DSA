@@ -858,7 +858,7 @@ After reversing the graph we have to perform simple topological sort.
 
 At the end the topological sort will contain the safe nodes and terminal nodes in reversed order.
 
-Now reverse the topological sort and return the answer.
+Now reverse/sort the topological sort and return the answer.
 */
 
 int main() {
