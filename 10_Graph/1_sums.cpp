@@ -861,6 +861,164 @@ At the end the topological sort will contain the safe nodes and terminal nodes i
 Now reverse/sort the topological sort and return the answer.
 */
 
+/*
+Alien Dictionary
+
+Given a list of strings, we have to find out the alien order.
+
+The standard english dictionary order is abcd....xyz.
+
+This order may change in alien dictionary depending upon the strings given.
+
+In addition we have also been given k.
+It signifies the no. of alphabets to take from the english dictionary.
+
+EG: k=4
+baa
+abcd
+abca
+cab
+cad
+
+The alien order will be bdac. 
+
+To solve this problem we use topological sort.
+
+From the given list of strings construct a directed graph.
+
+If the (k > alphabets in the list of strings) then consider the left out letter as singleton in graph.
+*/
+vector<int> topoSort(int V, vector<int> adj[]) {
+    int indegree[V] ={0};
+    
+    for(int i=0; i<V; i++) {
+        for(auto it: adj[i]) {
+            indegree[it]++;
+        }
+    }
+
+    queue<int> q;
+    for(int i=0; i<V; i++) {
+        if(indegree[i] == 0) {
+            q.push(i);
+        }
+    }
+
+    vector<int> topo;
+    while(!q.empty()) {
+        int node = q.front();
+        q.pop();
+        topo.push_back(node);
+
+        for(auto it: adj[node]) {
+            indegree[it]--;
+            if(indegree[it] == 0) {
+                q.push(it);
+            }
+        }
+    }
+
+    return topo;
+}
+
+string getAlienLanguage(vector<string> &dictionary, int k)
+{
+    int n = dictionary.size();
+    vector<int> adj[k];
+
+    for(int i=0; i<n-1; i++) {
+        string s1 = dictionary[i];
+        string s2 = dictionary[i+1];
+        int len = min(s1.size(), s2.size());
+        for(int j=0; j<len; j++) {
+            if(s1[j] != s2[j]) {
+                adj[s1[j] - 'a'].push_back(s2[j] - 'a');
+                break;
+            }
+        }
+    }
+
+    vector<int> topo = topoSort(k, adj);
+
+    string ans = "";
+    for(int i=0; i<topo.size(); i++) {
+        ans = ans + char(topo[i] + 'a');
+    }
+
+    return ans;
+}
+
+/*
+Shortest path in Directed Acyclic Graph.
+
+Given a source node we have to find the shortest path to all remaining nodes.
+
+The graph also has edge weights.
+
+Step 1: Do the topo sort of the graph.
+
+Step 2: Take out the nodes from the sort and perform edge relaxations.
+*/
+void spDfs(int node, vector<pair<int, int>> adj[], int vis[], stack<int> &st) {
+    vis[node] = 1;
+
+    for(auto it: adj[node]) {
+        int v = it.first;
+
+        if(!vis[v]) {
+            spDfs(v, adj, vis, st);
+        }
+    }
+
+    st.push(node);
+}
+
+vector<int> shortestPathInDAG(int n, int m, vector<vector<int>> &edges)
+{
+    vector<pair<int, int>> adj[n];
+    for(int i=0; i<m; i++) {
+        int u = edges[i][0];
+        int v = edges[i][1];
+        int wt = edges[i][2];
+        adj[u].push_back({v, wt});
+    }
+
+    int vis[n] = {0};
+    stack<int> st;
+
+    for(int i=0; i<n; i++) {
+        if(!vis[i]) {
+            spDfs(i, adj, vis, st);
+        }
+    }
+
+    vector<int> dis(n, INT_MAX);
+
+    dis[0] = 0;
+
+    while(!st.empty()) {
+        int node = st.top();
+        st.pop();
+
+        if(dis[node] != INT_MAX) {
+            for(auto it: adj[node]) {
+                int v = it.first;
+                int wt = it.second;
+
+                if(dis[node] + wt < dis[v]) {
+                    dis[v] = dis[node] + wt;
+                }
+            }
+        }
+    }
+
+    for (int i = 0; i < n; i++) {
+        if (dis[i] == INT_MAX) dis[i] = -1;
+    }
+
+    return dis;
+}
+
 int main() {
 
     vector<vector<int>> grid = {
