@@ -1019,6 +1019,107 @@ vector<int> shortestPathInDAG(int n, int m, vector<vector<int>> &edges)
     return dis;
 }
 
+/*
+Shortest Path in Undirected Graph.
+Consider edges to have unit weight.
+
+It uses plain BFS algorithm.
+The queue stores the node, dist can be taken from the dist[] array.
+*/
+vector<int> shortestPathInUG(vector<vector<int>> &edges, int N, int M, int src) {
+    vector<int> adj[N];
+    for(auto it: edges) {
+        int u = it[0];
+        int v = it[1];
+        adj[u].push_back(v);
+        adj[v].push_back(u);
+    }
+
+    int dist[N] = {INT_MAX};
+    dist[src] = 0;
+    queue<int> q;
+    q.push(src);
+
+    while(!q.empty()) {
+        int node = q.front();
+        q.pop();
+
+        for(auto it: adj[node]) {
+            if(dist[node] + 1 < dist[it]) {
+                dist[it] = dist[node] + 1;
+                q.push(it);
+            }
+        }
+    }
+
+    vector<int> ans(N, -1);
+    for(int i=0; i<N; i++) {
+        if(dist[i] != INT_MAX) {
+            ans[i] = dist[i];
+        }
+    }
+    
+    return ans;
+}
+
+/*
+Shortest path from a source to target node.
+
+It uses the BFS algorithm.
+
+Parent array which stores the information about the parent node.
+
+The queue is used to prepare parent array.
+
+As it makes use of the visited array by default it will store the nearest parent of all the nodes.
+
+The findPath function is used to backtrack and store the shortest path in ans.
+*/
+void findPath(int s, int t, vector<int> &ans, int parent[]) {
+	if(t == s) {
+		ans.push_back(t);
+		return;
+	}
+	findPath(s, parent[t], ans, parent);
+	ans.push_back(t);
+}
+
+vector<int> shortestPathST( vector<pair<int,int>> edges , int n , int m, int s , int t){
+	
+	vector<int> adj[n+1];
+	for(int i=0; i<m; i++) {
+		int u = edges[i].first;
+		int v = edges[i].second;
+		adj[u].push_back(v);
+		adj[v].push_back(u);
+	}
+
+	int vis[n+1] = {0};
+	int parent[n+1];
+	
+	queue<int> q;
+	q.push(s);
+	vis[s] = 1;
+	parent[s] = -1;
+
+	while(!q.empty()) {
+		int node = q.front();
+		q.pop();
+
+		for(auto it: adj[node]) {
+			if(!vis[it]) {
+				q.push(it);
+				vis[it] = 1;
+				parent[it] = node;
+			}
+		}
+	}
+
+	vector<int> ans;
+	findPath(s, t, ans, parent);
+	return ans;
+}
+
 int main() {
 
     vector<vector<int>> grid = {
