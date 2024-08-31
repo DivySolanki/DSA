@@ -105,6 +105,78 @@ vector<vector<string>> wordLadder2(string startWord, string targetWord, vector<s
     return ans;
 }
 
+/*
+Word Ladder 2 Optimized.
+
+This solution is the optimized version of the above problem.
+
+It involves 2 steps:
+1. Store all the possible words from the dictionary in a map with their level.
+Initially 0 or 1.
+2. Backtrack using dfs from the endword to the begin word and store the sequence.
+Add the new word only if it lies on the lower level.
+*/
+void dfs(string word, string startWord,  unordered_map<string, int> &mpp, vector<string> &seq, vector<vector<string>> &ans) {
+    if(word == startWord) {
+        reverse(seq.begin(), seq.end());
+        ans.push_back(seq);
+        reverse(seq.begin(), seq.end());
+        return;
+    }
+
+    int steps = mpp[word];
+
+    for(int i=0; i<word.size(); i++) {
+        char original = word[i];
+            for(char ch='a'; ch<='z'; ch++) {
+                word[i] = ch;
+                if(mpp.find(word) != mpp.end() && mpp[word] == steps - 1) {
+                    seq.push_back(word);
+                    dfs(word, startWord, mpp, seq, ans);
+                    seq.pop_back();
+                }
+            }
+        word[i] = original;
+    }
+
+}
+
+vector<vector<string>> wordLadder2_Optimized(string startWord, string targetWord, vector<string> &wordList) {
+    unordered_set<string> st(wordList.begin(), wordList.end());
+    queue<string> q;
+    q.push(startWord);
+    unordered_map<string, int> mpp;
+    mpp[startWord] = 0;
+    st.erase(startWord);
+    while(!q.empty()) {
+        string word = q.front();
+        int steps = mpp[word];
+        q.pop();
+        if(word == targetWord) break;
+        for(int i=0; i<word.size(); i++) {
+            char original = word[i];
+                for(char ch='a'; ch<='z'; ch++) {
+                    word[i] = ch;
+                    if(st.count(word)) {
+                        mpp[word] = steps + 1;
+                        st.erase(word);
+                        q.push(word);
+                    }
+                }
+            word[i] = original;
+        }
+    }
+
+    vector<vector<string>> ans;
+    if(mpp.find(targetWord) != mpp.end()) {
+        vector<string> seq;
+        seq.push_back(targetWord);
+        dfs(targetWord, startWord, mpp, seq, ans);
+    }
+    return ans;
+}
+
+
 int main() {
     string startWord = "hit";
     string endWord = "cog";
@@ -112,7 +184,7 @@ int main() {
         "hot", "dot", "dog", "lot", "log", "cog"
     };
 
-    vector<vector<string>> res =  wordLadder2(startWord, endWord, wordList);
+    vector<vector<string>> res =  wordLadder2_Optimized(startWord, endWord, wordList);
 
     for(auto f: res) {
         for(auto s: f) {
